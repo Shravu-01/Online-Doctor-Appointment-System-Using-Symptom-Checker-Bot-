@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Message Save</title>
+</head>
+<body>
+    <h1>Test Message Saving</h1>
+    
+    <div>
+        <label>Sender ID: <input type="number" id="sender_id" value="1"></label><br>
+        <label>Receiver ID: <input type="number" id="receiver_id" value="2"></label><br>
+        <label>Message: <input type="text" id="message" value="Test message"></label><br>
+        <button onclick="testSave()">Test Save to DB</button>
+    </div>
+    
+    <div id="result"></div>
+    
+    <script>
+        async function testSave() {
+            const sender_id = document.getElementById('sender_id').value;
+            const receiver_id = document.getElementById('receiver_id').value;
+            const message = document.getElementById('message').value;
+            
+            const response = await fetch('/test_save_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({sender_id, receiver_id, message})
+            });
+            
+            const result = await response.json();
+            document.getElementById('result').innerHTML = 
+                `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        }
+    </script>
+</body>
+</html>

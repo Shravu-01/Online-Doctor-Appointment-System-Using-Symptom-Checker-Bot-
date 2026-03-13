@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symptom Checker - Medical Assistant</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 10px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: white;
+            padding: 0 10px;
+        }
+        
+        .header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem); /* Responsive font size */
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+        
+        .header p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            opacity: 0.9;
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column; /* Stack vertically on mobile */
+            gap: 20px;
+            min-height: 70vh;
+            width: 100%;
+        }
+        
+        /* LEFT PANEL: Interactive Symptom Selector */
+        .symptom-selector-panel {
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            padding: 20px 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .panel-header h2 {
+            color: #333;
+            font-size: clamp(1.4rem, 3vw, 1.8rem);
+            word-wrap: break-word;
+        }
+        
+        .panel-icon {
+            font-size: 1.5rem;
+            background: #4CAF50;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+        
+        /* Symptom Selection Area */
+        .selection-method {
+            margin-bottom: 20px;
+        }
+        
+        .method-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+        
+        .tab-btn {
+            flex: 1;
+            min-width: 140px; /* Minimum width for tabs */
+            padding: 10px 8px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: #e0e0e0;
+        }
+        
+        /* Symptom Categories */
+        .symptom-categories {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .category {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .category-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        
+        .category h4 {
+            color: #333;
+            margin: 0;
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            word-wrap: break-word;
+        }
+        
+        .symptom-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 8px;
+        }
+        
+        .symptom-checkbox {
+            display: none;
+        }
+        
+        .symptom-label {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            word-wrap: break-word;
+        }
+        
+        .symptom-label:hover {
+            background: #e3f2fd;
+            transform: translateY(-2px);
+        }
+        
+        .symptom-checkbox:checked + .symptom-label {
+            background: linear-gradient(135deg, #1e88e5, #0d47a1);
+            color: white;
+        }
+        
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .symptom-checkbox:checked + .symptom-label .custom-checkbox {
+            background: white;
+            border-color: white;
+        }
+        
+        .custom-checkbox::after {
+            content: '✓';
+            color: #1e88e5;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 12px;
+        }
+        
+        .symptom-checkbox:checked + .symptom-label .custom-checkbox::after {
+            opacity: 1;
+        }
+        
+        /* Selection Summary */
+        .selection-summary {
+            background: #e8f5e8;
+            padding: 12px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .selected-count {
+            font-weight: bold;
+            color: #2E7D32;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+        }
+        
+        .selected-list {
+            margin-top: 8px;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            color: #555;
+            word-wrap: break-word;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap; /* Allow buttons to wrap */
+        }
+        
+        .btn {
+            flex: 1;
+            min-width: 120px; /* Minimum button width */
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        /* RIGHT PANEL: Chat & Results */
+        .chat-panel {
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            padding: 20px 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .chat-icon {
+            font-size: 1.5rem;
+            background: #FF9800;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .chat-header h2 {
+            color: #333;
+            font-size: clamp(1.4rem, 3vw, 1.8rem);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            max-height: 400px; /* Increased height */
+            min-height: 250px;
+        }
+        
+        .message {
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            max-width: 90%;
+            animation: fadeIn 0.3s;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .bot-message {
+            background: #e3f2fd;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 2px;
+        }
+        
+        /* REMOVED: Chat Input Area Styles */
+        /* .chat-input-area {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        #chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            outline: none;
+            transition: border-color 0.3s;
+            min-width: 0;
+        }
+        
+        #chat-input:focus {
+            border-color: #667eea;
+        }
+        
+        .send-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            width: 50px;
+            min-width: 50px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.05);
+        } */
+        
+        /* Text Input Area */
+        #text-symptoms {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            margin-bottom: 12px;
+            resize: vertical;
+            min-height: 100px;
+            box-sizing: border-box;
+        }
+        
+        /* Results Section */
+        .results-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f5e8;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+            display: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .doctor-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 8px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #1e88e5;
+            word-wrap: break-word;
+        }
+        
+        .doctor-match {
+            background: #4CAF50;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Responsive Design for tablets and desktops */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .container {
+                max-width: 1200px;
+                padding: 0 15px;
+            }
+            
+            .chat-container {
+                flex-direction: row; /* Side by side on larger screens */
+            }
+            
+            .symptom-selector-panel,
+            .chat-panel {
+                width: calc(50% - 10px); /* Split evenly with gap */
+            }
+            
+            .symptom-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            .action-buttons {
+                flex-wrap: nowrap; /* Keep buttons in one row */
+            }
+            
+            .btn {
+                min-width: auto;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .symptom-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .symptom-selector-panel,
+            .chat-panel {
+                padding: 25px 20px;
+            }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 375px) {
+            .symptom-grid {
+                grid-template-columns: 1fr; /* Single column on very small screens */
+            }
+            
+            .method-tabs {
+                flex-direction: column; /* Stack tabs vertically */
+            }
+            
+            .tab-btn {
+                min-width: 100%;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🩺 Medical Symptom Checker</h1>
+            <p>Select your symptoms or describe them in your own words</p>
+        </div>
+        
+        <div class="chat-container">
+            <!-- LEFT PANEL: Interactive Symptom Selector -->
+            <div class="symptom-selector-panel">
+                <div class="panel-header">
+                    <div class="panel-icon">📋</div>
+                    <h2>Symptom Selection</h2>
+                </div>
+                
+                <div class="selection-method">
+                    <div class="method-tabs">
+                        <button class="tab-btn active" onclick="switchMethod('interactive')">
+                            <span>✓</span> Interactive
+                        </button>
+                        <button class="tab-btn" onclick="switchMethod('text')">
+                            <span>💬</span> Text
+                        </button>
+                    </div>
+                    
+                    <p id="method-description" style="font-size: clamp(0.9rem, 2vw, 1rem);">
+                        Select symptoms from the categorized list below
+                    </p>
+                </div>
+                
+                <!-- Interactive Symptom Selector -->
+                <div id="interactive-selector">
+                    <div class="symptom-categories" id="symptom-categories">
+                        <!-- Categories will be loaded by JavaScript -->
+                        <div class="loading">Loading symptoms...</div>
+                    </div>
+                    
+                    <div class="selection-summary">
+                        <div>
+                            <span class="selected-count" id="selected-count">0</span> symptoms selected
+                        </div>
+                        <div class="selected-list" id="selected-list">
+                            No symptoms selected yet
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="clearSelection()">
+                            <span>🗑️</span> Clear
+                        </button>
+                        <button class="btn btn-primary" id="analyze-btn" onclick="analyzeSelectedSymptoms()" disabled>
+                            <span>🔍</span> Analyze
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Text Input Area (Hidden by default) -->
+                <div id="text-input-area" style="display: none;">
+                    <textarea id="text-symptoms" 
+                              placeholder="Describe your symptoms in your own words... 
+Example: 'I have headache and fever since yesterday'
+Example: 'Chest pain when breathing and fatigue'"
+                              rows="5"></textarea>
+                    <button class="btn btn-primary" onclick="analyzeTextSymptoms()" style="width: 100%;">
+                        <span>🔍</span> Analyze Text
+                    </button>
+                </div>
+            </div>
+            
+            <!-- RIGHT PANEL: Chat & Results -->
+            <div class="chat-panel">
+                <div class="chat-header">
+                    <div class="chat-icon">🤖</div>
+                    <h2>Medical Assistant</h2>
+                </div>
+                
+                <!-- Greeting Message -->
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message bot-message">
+                        <strong>👋 Hello!</strong><br>
+                        <p id="greeting-text">Loading time-based greeting...</p>
+                        <p>You can either:</p>
+                        <ul style="margin-left: 20px;">
+                            <li>✅ Select symptoms from the checklist</li>
+                            <li>💬 Describe symptoms in your own words using the Text tab on the left</li>
+                        </ul>
+                        <p>I'll help you find the right doctor!</p>
+                    </div>
+                </div>
+                
+                <!-- REMOVED: Chat Input Area -->
+                <!-- <div class="chat-input-area">
+                    <input type="text" 
+                           id="chat-input" 
+                           placeholder="Or type your symptoms here..."
+                           onkeypress="handleChatInput(event)">
+                    <button class="send-btn" onclick="sendChatMessage()">➤</button>
+                </div> -->
+                
+                <!-- Results Area -->
+                <div class="results-container" id="results-container">
+                    <h3 style="margin-bottom: 15px;">Doctor Recommendations</h3>
+                    <div id="results-message"></div>
+                    <div id="doctor-recommendations">
+                        <!-- Doctor cards will be added here -->
+                    </div>
+                    <div class="action-buttons" style="margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="bookAppointment()" id="book-btn" style="display: none;">
+                            <span>📅</span> Book Appointment
+                        </button>
+                        <button class="btn btn-secondary" onclick="restartChecker()">
+                            <span>🔄</span> Start Over
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedSymptomIds = [];
+        let selectedDoctorId = null;
+        let symptomMap = {}; // Will store symptom_id -> name mapping
+        
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            // Set time-based greeting
+            setGreeting();
+            
+            // Load symptom categories
+            loadSymptomCategories();
+        });
+        
+        function setGreeting() {
+            const hour = new Date().getHours();
+            let greeting;
+            
+            if (hour < 12) greeting = "Good morning";
+            else if (hour < 17) greeting = "Good afternoon";
+            else greeting = "Good evening";
+            
+            document.getElementById('greeting-text').textContent = 
+                `${greeting}! I'm your medical assistant.`;
+        }
+        
+        function switchMethod(method) {
+            const interactiveBtn = document.querySelector('.tab-btn:nth-child(1)');
+            const textBtn = document.querySelector('.tab-btn:nth-child(2)');
+            const interactiveDiv = document.getElementById('interactive-selector');
+            const textDiv = document.getElementById('text-input-area');
+            const description = document.getElementById('method-description');
+            
+            if (method === 'interactive') {
+                interactiveBtn.classList.add('active');
+                textBtn.classList.remove('active');
+                interactiveDiv.style.display = 'block';
+                textDiv.style.display = 'none';
+                description.textContent = 'Select symptoms from the categorized list below';
+            } else {
+                interactiveBtn.classList.remove('active');
+                textBtn.classList.add('active');
+                interactiveDiv.style.display = 'none';
+                textDiv.style.display = 'block';
+                description.textContent = 'Describe your symptoms in your own words';
+            }
+        }
+        
+        function loadSymptomCategories() {
+            fetch('/chatbot/symptoms')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displaySymptomCategories(data.symptoms);
+                        // Build symptom map for quick lookup
+                        buildSymptomMap(data.symptoms);
+                    } else {
+                        showError('Failed to load symptoms. Please refresh the page.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading symptoms:', error);
+                    showError('Connection error. Please check your internet.');
+                });
+        }
+        
+        function buildSymptomMap(categories) {
+            symptomMap = {};
+            for (const category in categories) {
+                for (const [id, name] of Object.entries(categories[category])) {
+                    symptomMap[id] = name;
+                }
+            }
+        }
+        
+        function displaySymptomCategories(categories) {
+            const container = document.getElementById('symptom-categories');
+            let html = '';
+            
+            const categoryIcons = {
+                'Respiratory & Chest': '🫁',
+                'Head & Neurological': '🧠',
+                'General & Systemic': '🌡️',
+                'Abdominal & Digestive': '🍽️',
+                'Skin Related': '🧴',
+                'Metabolic & Urinary': '⚖️',
+                'Cardiovascular': '❤️',
+                'Sleep & Mental': '😴'
+            };
+            
+            for (const [category, symptoms] of Object.entries(categories)) {
+                if (Object.keys(symptoms).length > 0) {
+                    html += `
+                    <div class="category">
+                        <div class="category-header">
+                            <span class="category-icon">${categoryIcons[category] || '📋'}</span>
+                            <h4>${category}</h4>
+                        </div>
+                        <div class="symptom-grid">`;
+                    
+                    for (const [id, name] of Object.entries(symptoms)) {
+                        html += `
+                        <div>
+                            <input type="checkbox" 
+                                   id="symptom-${id}" 
+                                   class="symptom-checkbox" 
+                                   value="${id}"
+                                   onchange="updateSymptomSelection(${id})">
+                            <label for="symptom-${id}" class="symptom-label">
+                                <span class="custom-checkbox"></span>
+                                ${name}
+                            </label>
+                        </div>`;
+                    }
+                    
+                    html += `</div></div>`;
+                }
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function updateSymptomSelection(symptomId) {
+            const checkbox = document.getElementById(`symptom-${symptomId}`);
+            
+            if (checkbox.checked) {
+                if (!selectedSymptomIds.includes(symptomId)) {
+                    selectedSymptomIds.push(symptomId);
+                }
+            } else {
+                selectedSymptomIds = selectedSymptomIds.filter(id => id !== symptomId);
+            }
+            
+            updateSelectionDisplay();
+        }
+        
+        function updateSelectionDisplay() {
+            const count = selectedSymptomIds.length;
+            const countElement = document.getElementById('selected-count');
+            const listElement = document.getElementById('selected-list');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            
+            // Update count with animation
+            countElement.textContent = count;
+            if (count > 0) {
+                countElement.style.animation = 'pulse 0.5s';
+                setTimeout(() => {
+                    countElement.style.animation = '';
+                }, 500);
+            }
+            
+            // Update list
+            if (count > 0) {
+                const symptomNames = selectedSymptomIds.map(id => symptomMap[id] || `Symptom ${id}`);
+                listElement.textContent = symptomNames.join(', ');
+                analyzeBtn.disabled = false;
+            } else {
+                listElement.textContent = 'No symptoms selected yet';
+                analyzeBtn.disabled = true;
+            }
+        }
+        
+        function clearSelection() {
+            selectedSymptomIds = [];
+            
+            // Uncheck all checkboxes
+            document.querySelectorAll('.symptom-checkbox:checked').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            updateSelectionDisplay();
+            addMessage('Cleared all selected symptoms.', 'user');
+        }
+        
+        function analyzeSelectedSymptoms() {
+            if (selectedSymptomIds.length === 0) {
+                alert('Please select at least one symptom.');
+                return;
+            }
+            
+            addMessage(`Analyzing ${selectedSymptomIds.length} selected symptoms...`, 'user');
+            
+            // Show loading state
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const originalText = analyzeBtn.innerHTML;
+            analyzeBtn.innerHTML = '<span>⏳</span> Analyzing...';
+            analyzeBtn.disabled = true;
+            
+            fetch('/chatbot/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({symptom_ids: selectedSymptomIds})
+            })
+            .then(response => response.json())
+            .then(data => {
+                analyzeBtn.innerHTML = originalText;
+                analyzeBtn.disabled = false;
+                
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    addMessage(`Error: ${data.error}`, 'bot');
+                }
+            })
+            .catch(error => {
+                analyzeBtn.innerHTML = originalText;
+                analyzeBtn.disabled = false;
+                addMessage('Network error. Please try again.', 'bot');
+                console.error('Error:', error);
+            });
+        }
+        
+        function analyzeTextSymptoms() {
+            const textInput = document.getElementById('text-symptoms').value.trim();
+            
+            if (!textInput) {
+                alert('Please describe your symptoms.');
+                return;
+            }
+            
+            addMessage(textInput, 'user');
+            addMessage('Analyzing your description...', 'bot');
+            
+            // Use your existing analyze_symptoms endpoint
+            fetch('/analyze_symptoms', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    symptoms: textInput, 
+                    user_id: 'current',
+                    source: 'text_description'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    addMessage(`Error: ${data.error}`, 'bot');
+                } else {
+                    // Display results in the chat
+                    let responseText = data.advice || 'Based on your description, here are my recommendations:';
+                    
+                    if (data.match_found && data.matched_diseases) {
+                        responseText += `\n\nPossible conditions: ${data.matched_diseases.join(', ')}`;
+                    }
+                    
+                    addMessage(responseText, 'bot');
+                    
+                    // Also show in results panel
+                    if (data.available_doctors && data.available_doctors.length > 0) {
+                        displayChatResults(data);
+                    } else {
+                        addMessage('No specific doctor matches found. Please consult with a general physician.', 'bot');
+                    }
+                }
+            })
+            .catch(error => {
+                addMessage('Error analyzing symptoms. Please try again.', 'bot');
+                console.error('Error:', error);
+            });
+            
+            // Clear text area after sending
+            document.getElementById('text-symptoms').value = '';
+        }
+        
+        // REMOVED: handleChatInput and sendChatMessage functions since chat input is removed
+        
+        function displayResults(data) {
+            const resultsContainer = document.getElementById('results-container');
+            const resultsMessage = document.getElementById('results-message');
+            const doctorList = document.getElementById('doctor-recommendations');
+            
+            // Show results container
+            resultsContainer.style.display = 'block';
+            
+            // Update message
+            resultsMessage.innerHTML = `<p>${data.message}</p>`;
+            
+            // Display doctor recommendations
+            let doctorsHtml = '';
+            
+            if (data.recommendations && data.recommendations.length > 0) {
+                data.recommendations.forEach((doctor, index) => {
+                    doctorsHtml += `
+                    <div class="doctor-card" data-doctor-id="${doctor.doctor_id}">
+                        <div class="doctor-match">
+                            ${doctor.match_percentage > 0 ? 
+                              `${doctor.match_percentage.toFixed(1)}% Match` : 
+                              'General Recommendation'}
+                        </div>
+                        <h4>${doctor.name}</h4>
+                        <p><strong>Specialization:</strong> ${doctor.specialization}</p>
+                        <p><strong>Expertise:</strong> ${doctor.disease || 'General Practice'}</p>
+                        <p><strong>Email:</strong> ${doctor.email}</p>
+                        ${doctor.matched_symptoms_count ? 
+                          `<p><strong>Matched Symptoms:</strong> ${doctor.matched_symptoms_count} of ${selectedSymptomIds.length}</p>` : ''}
+                        <button class="btn btn-primary" onclick="selectDoctor(${doctor.doctor_id})" style="margin-top: 10px;">
+                            Select This Doctor
+                        </button>
+                    </div>`;
+                });
+                
+                // Show book appointment button if we have matches
+                if (data.total_matches > 0) {
+                    document.getElementById('book-btn').style.display = 'block';
+                }
+            } else {
+                doctorsHtml = '<p>No specific matches found. Please try different symptoms or consult a general physician.</p>';
+            }
+            
+            doctorList.innerHTML = doctorsHtml;
+            
+            // Scroll to results
+            setTimeout(() => {
+                resultsContainer.scrollIntoView({behavior: 'smooth'});
+            }, 100);
+        }
+        
+        function displayChatResults(data) {
+            const resultsContainer = document.getElementById('results-container');
+            const resultsMessage = document.getElementById('results-message');
+            const doctorList = document.getElementById('doctor-recommendations');
+            
+            // Show results container
+            resultsContainer.style.display = 'block';
+            
+            // Update message
+            let messageHTML = '';
+            if (data.advice) {
+                messageHTML += `<p>${data.advice}</p>`;
+            }
+            if (data.match_found && data.matched_diseases) {
+                messageHTML += `<p><strong>Possible Conditions:</strong> ${data.matched_diseases.join(', ')}</p>`;
+            }
+            
+            resultsMessage.innerHTML = messageHTML || '<p>Analysis complete. Here are some doctor recommendations:</p>';
+            
+            // Display doctor recommendations
+            let doctorsHtml = '';
+            
+            if (data.available_doctors && data.available_doctors.length > 0) {
+                data.available_doctors.slice(0, 5).forEach((doctor, index) => {
+                    const isRecommended = data.matched_diseases && (
+                        data.matched_diseases.some(disease => 
+                            doctor.specialization?.toLowerCase().includes(disease.toLowerCase()) ||
+                            doctor.disease?.toLowerCase().includes(disease.toLowerCase())
+                        )
+                    );
+                    
+                    doctorsHtml += `
+                    <div class="doctor-card" data-doctor-id="${doctor.id}">
+                        <div class="doctor-match" style="background: ${isRecommended ? '#4CAF50' : '#FF9800'}">
+                            ${isRecommended ? 'Recommended' : 'Available'}
+                        </div>
+                        <h4>Dr. ${doctor.name}</h4>
+                        <p><strong>Specialization:</strong> ${doctor.specialization}</p>
+                        <p><strong>Expertise:</strong> ${doctor.disease || 'General Practice'}</p>
+                        <p><strong>Email:</strong> ${doctor.email}</p>
+                        <button class="btn btn-primary" onclick="selectDoctor(${doctor.id})" style="margin-top: 10px;">
+                            Select This Doctor
+                        </button>
+                    </div>`;
+                });
+                
+                // Show book appointment button
+                document.getElementById('book-btn').style.display = 'block';
+            }
+            
+            doctorList.innerHTML = doctorsHtml;
+            
+            // Scroll to results
+            setTimeout(() => {
+                resultsContainer.scrollIntoView({behavior: 'smooth'});
+            }, 100);
+        }
+        
+        function selectDoctor(doctorId) {
+            selectedDoctorId = doctorId;
+            
+            // Highlight selected doctor
+            document.querySelectorAll('.doctor-card').forEach(card => {
+                card.style.borderLeft = '4px solid #1e88e5';
+            });
+            
+            const selectedCard = document.querySelector(`[data-doctor-id="${doctorId}"]`);
+            if (selectedCard) {
+                selectedCard.style.borderLeft = '4px solid #4CAF50';
+                selectedCard.style.boxShadow = '0 5px 15px rgba(76, 175, 80, 0.3)';
+            }
+            
+            // Enable book appointment button
+            const bookBtn = document.getElementById('book-btn');
+            bookBtn.innerHTML = `<span>📅</span> Book Appointment`;
+            bookBtn.style.display = 'block';
+            
+            addMessage(`Selected doctor ID: ${doctorId}`, 'user');
+        }
+        
+        function bookAppointment() {
+    if (!selectedDoctorId) {
+        alert('Please select a doctor first.');
+        return;
+    }
+    
+    // Store selected doctor in sessionStorage before redirect
+    sessionStorage.setItem('selectedDoctorId', selectedDoctorId);
+    sessionStorage.setItem('fromSymptomChecker', 'true');
+    
+    // Redirect to appointment booking page
+    window.location.href = `/book-appointment?doctor_id=${selectedDoctorId}&from=symptom_checker`;
+}
+        
+        function restartChecker() {
+            // Clear selections
+            selectedSymptomIds = [];
+            selectedDoctorId = null;
+            
+            // Reset UI
+            clearSelection();
+            document.getElementById('results-container').style.display = 'none';
+            document.getElementById('book-btn').style.display = 'none';
+            document.getElementById('text-symptoms').value = '';
+            
+            // Clear chat messages except the first one
+            const chatMessages = document.getElementById('chat-messages');
+            const firstMessage = chatMessages.querySelector('.bot-message');
+            chatMessages.innerHTML = '';
+            if (firstMessage) {
+                chatMessages.appendChild(firstMessage);
+            }
+            
+            // Reset to interactive selection
+            switchMethod('interactive');
+            
+            addMessage('Started new symptom check.', 'user');
+        }
+        
+        function addMessage(text, sender) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function showError(message) {
+            const chatMessages = document.getElementById('chat-messages');
+            addMessage(`❌ ${message}`, 'bot');
+        }
+    </script>
+</body>
+</html>

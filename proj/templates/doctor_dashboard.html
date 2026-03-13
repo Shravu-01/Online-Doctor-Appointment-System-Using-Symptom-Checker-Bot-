@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Doctor Dashboard - True Heal Health Tech</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #dbeafe;
+      --secondary: #059669;
+      --secondary-dark: #047857;
+      --accent: #7c3aed;
+      --accent-dark: #6d28d9;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --light-bg: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --text-dark: #1e293b;
+      --text-light: #64748b;
+      --text-white: #ffffff;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+      --gradient-primary: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      --gradient-secondary: linear-gradient(135deg, #059669 0%, #047857 100%);
+      --gradient-accent: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      --gradient-card: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--light-bg);
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated background elements */
+    .bg-blur-1, .bg-blur-2, .bg-blur-3 {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      z-index: -1;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .bg-blur-1 {
+      width: 400px;
+      height: 400px;
+      background: var(--primary);
+      top: -100px;
+      left: -100px;
+      animation-delay: 0s;
+    }
+
+    .bg-blur-2 {
+      width: 300px;
+      height: 300px;
+      background: var(--secondary);
+      bottom: -50px;
+      right: 20%;
+      animation-delay: -2s;
+    }
+
+    .bg-blur-3 {
+      width: 250px;
+      height: 250px;
+      background: var(--accent);
+      top: 40%;
+      left: 60%;
+      animation-delay: -4s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+    
+    .navbar {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.95) 0%, rgba(29, 78, 216, 0.95) 100%);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      color: var(--text-white);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+      position: relative;
+      z-index: 100;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .navbar-brand {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .navbar-brand::before {
+      content: "⚕";
+      font-size: 1.75rem;
+    }
+    
+    .navbar-user {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      font-weight: 500;
+    }
+    
+    .navbar a {
+      color: var(--text-white);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid transparent;
+    }
+    
+    .navbar a:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+
+    .page-header::after {
+      content: '';
+      position: absolute;
+      bottom: -1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: var(--gradient-primary);
+      border-radius: 2px;
+    }
+    
+    .page-header h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text-dark) 0%, #374151 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    
+    .page-header p {
+      font-size: 1.125rem;
+      color: var(--text-light);
+      max-width: 600px;
+      margin: 0 auto;
+      font-weight: 400;
+    }
+
+    /* Dashboard cards layout */
+    .dashboard-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .dashboard-card {
+      background: var(--gradient-card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+    }
+
+    .dashboard-card:nth-child(2)::before {
+      background: var(--gradient-secondary);
+    }
+
+    .dashboard-card:nth-child(3)::before {
+      background: var(--gradient-accent);
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .card-icon.primary {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .card-icon.secondary {
+      background: rgba(5, 150, 105, 0.1);
+      color: var(--secondary);
+    }
+
+    .card-icon.accent {
+      background: rgba(124, 58, 237, 0.1);
+      color: var(--accent);
+    }
+
+    .card-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-dark);
+    }
+
+    .card-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-dark);
+    }
+
+    .card-description {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    /* Date selection form */
+    .date-section {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 3rem;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .date-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-secondary);
+    }
+
+    .section-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+    }
+
+    .date-form {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .date-input {
+      padding: 1rem 1.25rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: white;
+      font-family: 'Inter', sans-serif;
+      min-width: 200px;
+    }
+
+    .date-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+    }
+
+    /* Appointments section */
+    .appointments-section {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .appointments-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-accent);
+    }
+
+    .appointments-list {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .appointment-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      border-left: 4px solid var(--primary);
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .appointment-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .appointment-info h4 {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--text-dark);
+    }
+
+    .appointment-info p {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .appointment-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn-chat {
+      background: var(--gradient-accent);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-chat:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(124, 58, 237, 0.3);
+    }
+
+    /* NEW: Status badges */
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-scheduled {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--secondary);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-cancelled {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-completed {
+      background-color: rgba(59, 130, 246, 0.1);
+      color: #1d4ed8;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    /* NEW: Cancel button */
+    .btn-cancel {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-cancel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-light);
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-dark);
+    }
+
+    /* Debug panel */
+    .debug-panel {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      border-left: 4px solid var(--warning);
+    }
+
+    .debug-title {
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .debug-title::before {
+      content: '🔍';
+    }
+
+    .debug-info {
+      font-family: monospace;
+      font-size: 0.875rem;
+      color: var(--text-light);
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    .footer {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.95) 0%, rgba(29, 78, 216, 0.95) 100%);
+      color: var(--text-white);
+      padding: 2rem;
+      text-align: center;
+      margin-top: 3rem;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .footer-links a {
+      color: var(--text-white);
+      text-decoration: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 1rem auto;
+        padding: 0 1rem;
+      }
+      
+      .page-header h1 {
+        font-size: 2rem;
+      }
+
+      .page-header p {
+        font-size: 1rem;
+      }
+      
+      .date-section, .appointments-section {
+        padding: 1.5rem;
+      }
+
+      .navbar {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .navbar-user {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .appointment-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .appointment-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .date-form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .date-input {
+        min-width: auto;
+      }
+
+      .dashboard-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-links {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated background elements -->
+  <div class="bg-blur-1"></div>
+  <div class="bg-blur-2"></div>
+  <div class="bg-blur-3"></div>
+
+  <div class="navbar">
+    <div class="navbar-brand">True Heal Health Tech</div>
+    <div class="navbar-user">
+      <span>👋 Welcome, Dr. {{ current_user.username }}</span>
+      <a href="{{ url_for('main.logout') }}">🚪 Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>Doctor Dashboard</h1>
+      <p>Manage your appointments and connect with patients</p>
+    </div>
+
+    <!-- Dashboard cards -->
+    <div class="dashboard-cards">
+      <div class="dashboard-card">
+        <div class="card-icon primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+        <h3 class="card-title">Today's Appointments</h3>
+        <div class="card-value">{{ today_appointments_count }}</div>
+        <p class="card-description">Scheduled for today</p>
+      </div>
+      
+      <div class="dashboard-card">
+        <div class="card-icon secondary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <h3 class="card-title">Total Patients</h3>
+        <div class="card-value">{{ total_patients }}</div>
+        <p class="card-description">Under your care</p>
+      </div>
+      
+      <div class="dashboard-card">
+        <div class="card-icon accent">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <h3 class="card-title">Active Chats</h3>
+        <div class="card-value">{{ active_chats }}</div>
+        <p class="card-description">With patients</p>
+      </div>
+    </div>
+
+    <!-- Date selection form -->
+    <section class="date-section">
+      <h2 class="section-title">View Appointments</h2>
+      <form method="get" action="{{ url_for('main.doctor_dashboard') }}" class="date-form">
+        <input type="date" name="date" value="{{ selected_date.isoformat() }}" class="date-input">
+        <button type="submit" class="btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          Show Appointments
+        </button>
+      </form>
+    </section>
+
+    <!-- Appointments for the selected date -->
+    <section class="appointments-section">
+      <h2 class="section-title">Appointments for {{ selected_date.strftime('%B %d, %Y') }}</h2>
+      
+      {% if appointments %}
+        <div class="appointments-list">
+          {% for appt in appointments %}
+            <div class="appointment-card">
+              <div class="appointment-info">
+                <h4>Patient: {{ appt.patient.user.username }}</h4>
+                <p>{{ appt.appointment_date.strftime("%B %d, %Y") }} at {{ appt.appointment_time.strftime("%I:%M %p") }}</p>
+                <!-- NEW: Status display -->
+                <p><strong>Status:</strong> 
+                  <span class="status-badge 
+                    {% if appt.status == 'Scheduled' %}status-scheduled
+                    {% elif appt.status == 'Cancelled' %}status-cancelled
+                    {% else %}status-completed{% endif %}">
+                    {{ appt.status }}
+                  </span>
+                </p>
+                <p>Appointment ID: {{ appt.id }}</p>
+              </div>
+              <div class="appointment-actions">
+                <!-- NEW: Cancel button for scheduled appointments -->
+                {% if appt.status == 'Scheduled' %}
+                <form action="{{ url_for('main.cancel_appointment', appointment_id=appt.id) }}" method="POST" style="display: inline;">
+                  <button type="submit" class="btn-cancel" onclick="return confirm('Are you sure you want to cancel this appointment?')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    Cancel
+                  </button>
+                </form>
+                {% endif %}
+                <!-- FIXED: Use current_user.id for doctor_id and appt.patient.user_id for patient_id -->
+                <a href="{{ url_for('main.chat', doctor_id=current_user.id, patient_id=appt.patient.user_id) }}">
+                  <button class="btn-chat" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Chat with Patient
+                  </button>
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <h3>No Appointments Scheduled</h3>
+          <p>There are no appointments scheduled for this date.</p>
+        </div>
+      {% endif %}
+    </section>
+
+    <!-- Debug panel (optional - can be removed in production) -->
+    <div class="debug-panel">
+      <div class="debug-title">Debug Information</div>
+      <div class="debug-info">
+        Doctor ID: {{ doctor.id if doctor else 'None' }}<br>
+        Doctor User ID: {{ current_user.id }}<br>
+        Selected Date: {{ selected_date }}<br>
+        Appointments Count: {{ appointments|length }}<br>
+        {% for appt in appointments %}
+          Appointment ID: {{ appt.id }}<br>
+          - Doctor ID: {{ appt.doctor_id }}<br>
+          - Patient ID: {{ appt.patient.id }}<br>
+          - Patient User ID: {{ appt.patient.user.id }}<br>
+          - Chat Link: /chat/{{ doctor.id }}/{{ appt.patient.id }}<br>
+          ---<br>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="navbar-brand">True Heal Health Tech</div>
+      <p>Professional healthcare management platform</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Contact Support</a>
+        <a href="#">About True Heal Health Tech</a>
+      </div>
+      <p>&copy; 2023 True Heal Health Tech. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Set today's date as default if not already set
+      const dateInput = document.querySelector('input[type="date"]');
+      if (dateInput && !dateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+      }
+    });
+  </script>
+</body>
+</html>
